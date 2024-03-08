@@ -1,0 +1,4 @@
+name: shopPlugin
+version: '${project.version}'
+main: com.hanabi.shopplugin.ShopPlugin
+api-version: '1.20'

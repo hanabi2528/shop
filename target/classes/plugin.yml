@@ -1,0 +1,4 @@
+name: shopPlugin
+version: '1.0-SNAPSHOT'
+main: com.hanabi.shopplugin.ShopPlugin
+api-version: '1.20'
