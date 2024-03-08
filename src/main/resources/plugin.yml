@@ -2,3 +2,11 @@ name: shopPlugin
 version: '${project.version}'
 main: com.hanabi.shopplugin.ShopPlugin
 api-version: '1.20'
+
+commands:
+  createsign:
+    description: 看板を作成する
+    permission: createsign.command
+permissions:
+  createsign.command:
+    default: op

@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -83,6 +85,7 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("Shopプラグインが終了しました");
         // Plugin shutdown logic
     }
+
     @EventHandler
     public void onPlayerSignOpenEvent(PlayerSignOpenEvent event) {
         event.setCancelled(true);
@@ -112,12 +115,42 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
             }
         }
     }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getClickedInventory() != null && event.getClickedInventory().equals("買取ショップ")) {
             // プレイヤーがカスタムインベントリ内でアイテムを移動しようとした場合
             event.setCancelled(true); // アイテムの移動をキャンセル
         }
+    }
+
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("createsign")) {
+            Player player = (Player) sender;
+
+            // プレイヤーが向いているブロックを取得
+            Block targetBlock = player.getTargetBlock(null, 5);
+
+            // プレイヤーが看板を向いている場合
+            if (targetBlock.getType() == Material.OAK_SIGN) {
+                Sign sign = (Sign) targetBlock.getState();
+
+                // 看板にテキストを設定
+                for (int i = 0; i < args.length && i < 4; i++) {
+                    sign.setLine(i, args[i]);
+                }
+
+                // 看板の更新
+                sign.update();
+
+                player.sendMessage("成功しました");
+            } else {
+                player.sendMessage("看板を見ていないので作成できません");
+            }
+
+            return true;
+        }
+        return false;
     }
 }
 
