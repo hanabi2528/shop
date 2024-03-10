@@ -21,45 +21,60 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ShopPlugin extends JavaPlugin implements Listener {
 
+    private Inventory customInventory;
+
+    @Override
+    public void onEnable() {
+        Bukkit.getLogger().info("Shopプラグインが開始しました");
+        Bukkit.getPluginManager().registerEvents(this, this);
+        // Plugin startup logic
+
+
+    }
+
+    @Override
+    public void onDisable() {
+        Bukkit.getLogger().info("Shopプラグインが終了しました");
+        // Plugin shutdown logic
+    }
+
+
     private Inventory createCustomInventory(Player player) {
         Inventory inventory = Bukkit.createInventory(null, 9 * 6, "買取ショップ");
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 0);
 
-        // 1列目
-        ItemStack blueGlass = createItem(Material.BLUE_STAINED_GLASS, "");
-        setInventoryColumn(inventory, blueGlass, 0);
+        // 2行目
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 1);
+        inventory.setItem(1 * 9 + 4, createItem(Material.DIAMOND, "ダイヤモンド"));
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 2);
 
-        // 2列目
-        ItemStack diamond = createItem(Material.DIAMOND, "ダイヤモンド");
-        setInventoryColumn(inventory, blueGlass, 1);
-        inventory.setItem(1 * 9 + 4, diamond);
-        setInventoryColumn(inventory, blueGlass, 2);
+        // 3行目
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 2);
 
-        // 3列目
-        setInventoryColumn(inventory, blueGlass, 2);
+        // 4行目
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 3);
+        setInventoryRow(inventory, createItem(Material.RED_STAINED_GLASS, "売却"), 4);
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 5);
 
-        // 4列目
-        setInventoryColumn(inventory, blueGlass, 3);
-        setInventoryColumn(inventory, createItem(Material.RED_STAINED_GLASS, "売却"), 4);
-        setInventoryColumn(inventory, blueGlass, 5);
-
-        // 5列目
-        setInventoryColumn(inventory, blueGlass, 4);
+        // 5行目
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 4);
         inventory.setItem(4 * 9 + 1, createItem(Material.RED_BANNER, "一つ減らす"));
-        setInventoryColumn(inventory, createItem(Material.RED_STAINED_GLASS, "売却"), 4);
+        setInventoryRow(inventory, createItem(Material.RED_STAINED_GLASS, "売却"), 4);
         inventory.setItem(4 * 9 + 7, createItem(Material.BLUE_BANNER, "一つ増やす"));
-        setInventoryColumn(inventory, blueGlass, 5);
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 5);
 
-        // 6列目
-        setInventoryColumn(inventory, blueGlass, 5);
+        // 6行目
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 5);
 
+        // プレイヤーにインベントリを開く
         player.openInventory(inventory);
         return inventory;
     }
 
-    // 指定されたアイテムで列を埋めるメソッド
-    private void setInventoryColumn(Inventory inventory, ItemStack item, int column) {
-        for (int row = 0; row < inventory.getSize() / 9; row++) {
-            inventory.setItem(row * 9 + column, item);
+    // 指定されたアイテムで行を埋めるメソッド
+    private void setInventoryRow(Inventory inventory, ItemStack item, int row) {
+        for (int i = 0; i < inventory.getSize() / 9; i++) {
+            inventory.setItem(row * 9 + i, item);
         }
     }
 
@@ -70,20 +85,6 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
         meta.setDisplayName(displayName);
         itemStack.setItemMeta(meta);
         return itemStack;
-    }
-
-    @Override
-    public void onEnable() {
-        Bukkit.getLogger().info("Shopプラグインが開始しました");
-        Bukkit.getPluginManager().registerEvents(this, this);
-        // Plugin startup logic
-
-    }
-
-    @Override
-    public void onDisable() {
-        Bukkit.getLogger().info("Shopプラグインが終了しました");
-        // Plugin shutdown logic
     }
 
     @EventHandler
@@ -118,41 +119,49 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getClickedInventory() != null && event.getClickedInventory().equals("買取ショップ")) {
-            // プレイヤーがカスタムインベントリ内でアイテムを移動しようとした場合
-            event.setCancelled(true); // アイテムの移動をキャンセル
+        if (event.getInventory().getHolder() instanceof CustomInventoryHolder) {
+            // カスタムインベントリの場合、アイテムの移動をキャンセル
+            event.setCancelled(true);
         }
     }
 
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("createsign")) {
-            Player player = (Player) sender;
+    private static class CustomInventoryHolder implements org.bukkit.inventory.InventoryHolder {
+        @Override
+        public Inventory getInventory() {
+            return null;
+        }
 
-            // プレイヤーが向いているブロックを取得
-            Block targetBlock = player.getTargetBlock(null, 5);
+        public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+            if (command.getName().equalsIgnoreCase("createsign")) {
+                Player player = (Player) sender;
 
-            // プレイヤーが看板を向いている場合
-            if (targetBlock.getType() == Material.OAK_SIGN) {
-                Sign sign = (Sign) targetBlock.getState();
+                // プレイヤーが向いているブロックを取得
+                Block targetBlock = player.getTargetBlock(null, 5);
 
-                // 看板にテキストを設定
-                for (int i = 0; i < args.length && i < 4; i++) {
-                    sign.setLine(i, args[i]);
+                // プレイヤーが看板を向いている場合
+                if (targetBlock.getType() == Material.OAK_SIGN) {
+                    Sign sign = (Sign) targetBlock.getState();
+
+                    // 看板にテキストを設定
+                    for (int i = 0; i < args.length && i < 4; i++) {
+                        sign.setLine(i, args[i]);
+                    }
+
+                    // 看板の更新
+                    sign.update();
+
+                    player.sendMessage("成功しました");
+                } else {
+                    player.sendMessage("看板を見ていないので作成できません");
                 }
 
-                // 看板の更新
-                sign.update();
-
-                player.sendMessage("成功しました");
-            } else {
-                player.sendMessage("看板を見ていないので作成できません");
+                return true;
             }
-
-            return true;
+            return false;
         }
-        return false;
     }
 }
+
 
 
 
