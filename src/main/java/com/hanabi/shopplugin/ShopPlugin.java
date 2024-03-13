@@ -40,31 +40,9 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
 
 
     private Inventory createCustomInventory(Player player) {
-        Inventory inventory = Bukkit.createInventory(null, 9 * 6, "買取ショップ");
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 0);
+        Inventory inventory = Bukkit.createInventory(new CustomInventoryHolder(), 9 * 6, "買取ショップ");
 
-        // 2行目
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 1);
-        inventory.setItem(1 * 9 + 4, createItem(Material.DIAMOND, "ダイヤモンド"));
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 2);
-
-        // 3行目
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 2);
-
-        // 4行目
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 3);
-        setInventoryRow(inventory, createItem(Material.RED_STAINED_GLASS, "売却"), 4);
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 5);
-
-        // 5行目
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 4);
-        inventory.setItem(4 * 9 + 1, createItem(Material.RED_BANNER, "一つ減らす"));
-        setInventoryRow(inventory, createItem(Material.RED_STAINED_GLASS, "売却"), 4);
-        inventory.setItem(4 * 9 + 7, createItem(Material.BLUE_BANNER, "一つ増やす"));
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 5);
-
-        // 6行目
-        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS, "."), 5);
+        setInventoryRow(inventory, createItem(Material.BLUE_STAINED_GLASS_PANE, "."));
 
         // プレイヤーにインベントリを開く
         player.openInventory(inventory);
@@ -72,9 +50,19 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
     }
 
     // 指定されたアイテムで行を埋めるメソッド
-    private void setInventoryRow(Inventory inventory, ItemStack item, int row) {
-        for (int i = 0; i < inventory.getSize() / 9; i++) {
-            inventory.setItem(row * 9 + i, item);
+    private void setInventoryRow(Inventory inventory, ItemStack item) {
+        for (int i = 0; i < 13; i++) {
+            inventory.setItem(i, item);
+        }
+        inventory.setItem(13, new ItemStack(Material.DIAMOND));
+        for (int i = 14; i < 30; i++) {
+            inventory.setItem(i, item);
+        }
+        for (int i = 30; i < 33; i++) {
+            inventory.setItem(i, createItem(Material.RED_STAINED_GLASS_PANE,"売却"));
+        }
+        for (int i = 33; i < 37; i++) {
+            inventory.setItem(i, item);
         }
     }
 
@@ -130,7 +118,7 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
         public Inventory getInventory() {
             return null;
         }
-
+    }
         public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
             if (command.getName().equalsIgnoreCase("createsign")) {
                 Player player = (Player) sender;
@@ -160,7 +148,7 @@ public final class ShopPlugin extends JavaPlugin implements Listener {
             return false;
         }
     }
-}
+
 
 
 
